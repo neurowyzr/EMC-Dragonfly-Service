@@ -1,0 +1,15 @@
+*.class
+*.log
+/.idea
+/.bsp
+/logs
+/project/project
+/project/target
+/target
+/local/data/
+init-project.sh
+rename-project.sh
+INSTRUCTIONS.md
+local.env
+/cicd/data/
+/cicd/temp/
