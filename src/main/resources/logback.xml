@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration>
+<configuration>
+
+    <shutdownHook class="ch.qos.logback.core.hook.DefaultShutdownHook"/>
+
+    <!-- JUL to Logback bridge -->
+    <contextListener class="ch.qos.logback.classic.jul.LevelChangePropagator">
+        <resetJUL>true</resetJUL>
+    </contextListener>
+
+    <!-- ===================================================== -->
+    <!-- Common Config -->
+    <!-- ===================================================== -->
+
+    <define name="hostname" class="ch.qos.logback.core.property.CanonicalHostNamePropertyDefiner"/>
+
+    <property name="app_home" value="."/>
+    <property name="project_name" value="nw-apollo-dragon-service"/>
+    <property name="log_base_path" value="${app_home}/logs"/>
+
+    <property name="CONSOLE_PATTERN"
+              value="%white(%date{HH:mm:ss.SSS}) %highlight(%-5level) %green(%20.20thread) %magenta(%-16X{traceId}) %cyan(%40.40logger) %msg%n"/>
+
+    <property name="LOGSTASH_ROLLING_FILENAME_PATTERN"
+              value="${log_base_path}/${project_name}_${hostname}_%d.log.json"/>
+
+    <contextName>${project_name}</contextName>
+
+    <!-- ===================================================== -->
+    <!-- Appenders -->
+    <!-- ===================================================== -->
+
+    <!-- LOGSTASH Appender -->
+    <appender name="LOGSTASH" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <prudent>true</prudent>
+
+        <encoder class="net.logstash.logback.encoder.LoggingEventCompositeJsonEncoder">
+            <providers>
+                <provider class="net.logstash.logback.composite.loggingevent.LogstashMarkersJsonProvider"/>
+                <timestamp>
+                    <!--@timestamp is used by elk-->
+                    <fieldName>@timestamp</fieldName>
+                    <timeZone>UTC</timeZone>
+                </timestamp>
+                <logLevel>
+                    <fieldName>level</fieldName>
+                </logLevel>
+                <threadName>
+                    <fieldName>thread</fieldName>
+                </threadName>
+                <contextName>
+                    <!--service_name is used by elk-->
+                    <fieldName>service_name</fieldName>
+                </contextName>
+                <loggerName>
+                    <fieldName>logger</fieldName>
+                </loggerName>
+                <message>
+                    <fieldName>message</fieldName>
+                </message>
+                <throwableClassName>
+                    <fieldName>exception</fieldName>
+                </throwableClassName>
+                <pattern>
+                    <pattern>
+                        { "hostname": "${hostname}" }
+                    </pattern>
+                </pattern>
+                <mdc/>
+                <arguments>
+                    <includeNonStructuredArguments>true</includeNonStructuredArguments>
+                </arguments>
+                <stackTrace>
+                    <fieldName>stack_trace</fieldName>
+                    <throwableConverter class="net.logstash.logback.stacktrace.ShortenedThrowableConverter">
+                        <maxDepthPerThrowable>50</maxDepthPerThrowable>
+                        <maxLength>3000</maxLength>
+                        <rootCauseFirst>true</rootCauseFirst>
+                    </throwableConverter>
+                </stackTrace>
+            </providers>
+        </encoder>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOGSTASH_ROLLING_FILENAME_PATTERN}</fileNamePattern>
+            <maxHistory>5</maxHistory>
+        </rollingPolicy>
+    </appender>
+
+    <!-- STDOUT Appender -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <withJansi>true</withJansi>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>${CONSOLE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <!-- ===================================================== -->
+    <!-- Async Appenders -->
+    <!-- ===================================================== -->
+
+    <property name="async_queue_size" value="256"/>
+    <property name="async_queue_timeout" value="0"/>
+
+    <!-- Async LOGSTASH Appender -->
+    <appender name="ASYNC-LOGSTASH" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+        <appender-ref ref="LOGSTASH"/>
+        <ringBufferSize>${async_queue_size}</ringBufferSize>
+        <appendTimeout>${async_queue_timeout}</appendTimeout>
+    </appender>
+
+    <!-- Async STDOUT Appender -->
+    <appender name="ASYNC-STDOUT" class="net.logstash.logback.appender.LoggingEventAsyncDisruptorAppender">
+        <appender-ref ref="STDOUT"/>
+        <ringBufferSize>${async_queue_size}</ringBufferSize>
+        <appendTimeout>${async_queue_timeout}</appendTimeout>
+    </appender>
+
+    <!-- ===================================================== -->
+    <!-- Logger Configuration -->
+    <!-- ===================================================== -->
+
+    <root>
+        <level value="INFO"/>
+        <appender-ref ref="ASYNC-STDOUT"/>
+        <appender-ref ref="ASYNC-LOGSTASH"/>
+    </root>
+
+</configuration>

@@ -1,0 +1,32 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/v1/patients/fake-patient-ref/episodes/fake-episode-ref/LocationId/fake-location-id/status",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      },
+      "Authorization": {
+        "equalTo": "Bearer fake-auth-token-12345"
+      },
+      "Correlation-Id": {
+        "equalTo": "fake-request-id"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "status": 1,
+          "link": "fake-magic-link-url"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 204,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "body": "{\"status\": 204, \"description\": \"Request is acknowledged\"}"
+  }
+}

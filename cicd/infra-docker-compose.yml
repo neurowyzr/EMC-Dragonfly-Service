@@ -1,0 +1,34 @@
+
+# all versions must match aws infra
+services:
+
+  mysql:
+    image: mysql:8.0.34
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      - MYSQL_ROOT_PASSWORD=password
+    volumes:
+      - ./init/db/:/docker-entrypoint-initdb.d/:ro
+      - ./temp/mysql/:/var/lib/mysql/:rw
+    ports:
+      - 3306:3306
+
+  rabbitmq:
+    # default credentials is guest:guest
+    image: rabbitmq:3.10.10-management-alpine
+    restart: always
+    volumes:
+      - ./data/rmq:/var/lib/rabbitmq/
+    ports:
+      - 5672:5672
+      - 15672:15672
+
+  wiremock:
+    image: wiremock/wiremock:3.9.1-1-alpine
+    ports:
+      - 8080:8080
+    command:
+      - --global-response-templating
+    volumes:
+      - ./wiremock:/home/wiremock

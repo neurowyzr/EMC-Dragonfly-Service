@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPattern": "/v1/patients/[^/]+/episodes/[^/]+/LocationId/[^/]+/report",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      },
+      "Authorization": {
+        "matches": "Bearer .+"
+      },
+      "Correlation-Id": {
+        "matches": ".+"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "matchesJsonPath": "$.Base64Pdf"
+      }
+    ]
+  },
+  "response": {
+    "status": 204
+  }
+}

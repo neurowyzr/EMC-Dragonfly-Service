@@ -1,0 +1,30 @@
+{
+  "request": {
+    "method": "POST",
+    "urlPath": "/api/User/authenticate",
+    "headers": {
+      "Content-Type": {
+        "equalTo": "application/json"
+      }
+    },
+    "bodyPatterns": [
+      {
+        "equalToJson": {
+          "Username": "api_auth_username",
+          "Password": "api_auth_password"
+        }
+      }
+    ]
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "authToken": "fake-auth-token-12345",
+      "vendorCode": "fake-vendor-code-12345",
+      "errorDetails": "No Error(s) found"
+    }
+  }
+}
